@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const cors = require("cors");
 const helmet = require("helmet");
 const authRoutes = require("./routes/auth");
@@ -33,19 +32,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from public folder
-const publicPath = path.join(__dirname, "../public");
-app.use(express.static(publicPath, { index: false }));
-
 // Request logging
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`);
   next();
-});
-
-// Root route - serve login page
-app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
 });
 
 app.use("/api/auth", authRoutes);
@@ -57,19 +47,13 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-// SPA Fallback - serve index.html for non-API routes
+// 404 handler for undefined routes
 app.use((req, res) => {
-  // If it's not an API route, serve index.html for SPA routing
-  if (!req.path.startsWith("/api")) {
-    res.sendFile(path.join(publicPath, "index.html"));
-  } else {
-    // 404 for API routes that don't exist
-    logger.warn(`404 Not Found: ${req.method} ${req.path}`);
-    res.status(404).json({
-      success: false,
-      message: "Route not found",
-    });
-  }
+  logger.warn(`404 Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
 });
 
 // Error handling middleware
