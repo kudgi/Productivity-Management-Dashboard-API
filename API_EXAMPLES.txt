@@ -1,0 +1,197 @@
+// API Testing Examples using Postman or cURL
+
+// ============================================
+// AUTHENTICATION ENDPOINTS
+// ============================================
+
+// 1. REGISTER NEW USER
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+// 2. LOGIN USER
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+// Save the token from response: eyJhbGciOiJIUzI1NiIs...
+// Use it in all subsequent requests as:
+// Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+// ============================================
+// TASK MANAGEMENT ENDPOINTS
+// ============================================
+
+// 3. CREATE A NEW TASK
+POST http://localhost:5000/api/tasks
+Authorization: Bearer {YOUR_TOKEN}
+Content-Type: application/json
+
+{
+  "title": "Complete project proposal",
+  "description": "Finish the Q1 project proposal document",
+  "priority": "High",
+  "status": "In Progress",
+  "deadline": "2026-02-28T23:59:59Z",
+  "tags": ["work", "proposal"]
+}
+
+// 4. GET ALL TASKS (with filters)
+GET http://localhost:5000/api/tasks
+Authorization: Bearer {YOUR_TOKEN}
+
+// With filters:
+GET http://localhost:5000/api/tasks?status=Pending&priority=High
+GET http://localhost:5000/api/tasks?search=report
+GET http://localhost:5000/api/tasks?tags=work,urgent
+GET http://localhost:5000/api/tasks?startDate=2026-01-01&endDate=2026-02-01
+
+// 5. GET SINGLE TASK
+GET http://localhost:5000/api/tasks/{TASK_ID}
+Authorization: Bearer {YOUR_TOKEN}
+
+// 6. UPDATE TASK
+PUT http://localhost:5000/api/tasks/{TASK_ID}
+Authorization: Bearer {YOUR_TOKEN}
+Content-Type: application/json
+
+{
+  "status": "Completed",
+  "priority": "Medium"
+}
+
+// 7. DELETE TASK
+DELETE http://localhost:5000/api/tasks/{TASK_ID}
+Authorization: Bearer {YOUR_TOKEN}
+
+// ============================================
+// DASHBOARD ANALYTICS ENDPOINTS
+// ============================================
+
+// 8. GET DASHBOARD OVERVIEW
+GET http://localhost:5000/api/dashboard/overview
+Authorization: Bearer {YOUR_TOKEN}
+
+// Response includes:
+// - totalTasks
+// - completedTasks
+// - pendingTasks
+// - inProgressTasks
+// - overdueTasks
+// - completionRate
+
+// 9. GET STATISTICS (weekly or monthly)
+GET http://localhost:5000/api/dashboard/statistics?period=week
+Authorization: Bearer {YOUR_TOKEN}
+
+// Query parameters:
+// - period: "week" or "month"
+
+// Response includes:
+// - completedInPeriod
+// - createdInPeriod
+// - priorityDistribution
+// - statusDistribution
+// - completionTrend (per day)
+
+// 10. GET PRODUCTIVITY SCORE
+GET http://localhost:5000/api/dashboard/productivity-score
+Authorization: Bearer {YOUR_TOKEN}
+
+// Response includes:
+// - score (0-100)
+// - level (Beginner, Intermediate, Advanced, Expert)
+// - totalTasks
+// - completedTasks
+// - completionRate
+// - overdueTasks
+
+// ============================================
+// CURL COMMAND EXAMPLES
+// ============================================
+
+// Register
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username":"john_doe",
+    "email":"john@example.com",
+    "password":"password123"
+  }'
+
+// Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john@example.com",
+    "password":"password123"
+  }'
+
+// Create Task
+curl -X POST http://localhost:5000/api/tasks \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title":"Complete report",
+    "priority":"High",
+    "deadline":"2026-02-28T00:00:00Z",
+    "tags":["work"]
+  }'
+
+// Get all tasks
+curl -X GET http://localhost:5000/api/tasks \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+// Get overview
+curl -X GET http://localhost:5000/api/dashboard/overview \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+// ============================================
+// ERROR RESPONSE EXAMPLES
+// ============================================
+
+// 400 Bad Request (Validation Error)
+{
+  "success": false,
+  "message": "Validation error",
+  "details": [
+    {
+      "field": "title",
+      "message": "\"title\" is required"
+    }
+  ]
+}
+
+// 401 Unauthorized (Missing Token)
+{
+  "success": false,
+  "message": "Not authorized to access this route"
+}
+
+// 403 Forbidden (Not Task Owner)
+{
+  "success": false,
+  "message": "Not authorized to access this task"
+}
+
+// 404 Not Found
+{
+  "success": false,
+  "message": "Task not found"
+}
+
+// 500 Server Error
+{
+  "success": false,
+  "message": "Error creating task",
+  "error": "Detailed error message"
+}
